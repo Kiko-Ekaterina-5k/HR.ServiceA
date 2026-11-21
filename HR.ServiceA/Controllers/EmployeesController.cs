@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using HR.ServiceA.Models;
 using HR.ServiceA.Services;
 
 namespace HR.ServiceA.Controllers;
 
+/// <summary>
+/// Контроллер для управления данными сотрудников
+/// и прогнозирования риска текучести кадров.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class EmployeesController : ControllerBase
@@ -26,20 +31,35 @@ public class EmployeesController : ControllerBase
 
     private readonly RiskService _riskService;
 
+    /// <summary>
+    /// Создаёт контроллер сотрудников.
+    /// </summary>
+    /// <param name="riskService">Сервис расчёта риска увольнения.</param>
     public EmployeesController(RiskService riskService)
     {
         _riskService = riskService;
     }
 
-    // GET: api/employees
+    /// <summary>
+    /// Получает полный список сотрудников.
+    /// </summary>
+    /// <returns>Список сотрудников.</returns>
+    /// <response code="200">Список сотрудников успешно получен.</response>
     [HttpGet]
+    [ProducesResponseType(typeof(List<Employee>), StatusCodes.Status200OK)]
     public ActionResult<List<Employee>> GetAll()
     {
         return Ok(_employees);
     }
 
-    // POST: api/employees
+    /// <summary>
+    /// Добавляет нового сотрудника в систему.
+    /// </summary>
+    /// <param name="employee">Данные нового сотрудника.</param>
+    /// <returns>Добавленный сотрудник с присвоенным идентификатором.</returns>
+    /// <response code="200">Сотрудник успешно добавлен.</response>
     [HttpPost]
+    [ProducesResponseType(typeof(Employee), StatusCodes.Status200OK)]
     public ActionResult<Employee> Add([FromBody] Employee employee)
     {
         employee.Id = _employees.Count + 1;
@@ -47,8 +67,14 @@ public class EmployeesController : ControllerBase
         return Ok(employee);
     }
 
-    // POST: api/employees/forecast
+    /// <summary>
+    /// Рассчитывает риск увольнения сотрудника.
+    /// </summary>
+    /// <param name="employee">Данные сотрудника для анализа.</param>
+    /// <returns>Оценка риска, уровень риска и рекомендация.</returns>
+    /// <response code="200">Прогноз успешно рассчитан.</response>
     [HttpPost("forecast")]
+    [ProducesResponseType(typeof(RiskForecastResponse), StatusCodes.Status200OK)]
     public ActionResult<RiskForecastResponse> Forecast([FromBody] Employee employee)
     {
         var result = _riskService.CalculateRisk(employee);
